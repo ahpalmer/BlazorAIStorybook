@@ -1,5 +1,6 @@
 ﻿@page "/image"
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -39,14 +40,16 @@
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button class="btn btn-primary" @onclick="GoBack">Create Another Character</button>
+                            <!-- Use direct link instead of button with NavigationManager -->
+                            <a href="/userInput" class="btn btn-primary">Create Another Character</a>
                         </div>
                     }
                     else
                     {
                         <div class="alert alert-warning">
                             <p>No character details found. Please go back and create a character.</p>
-                            <button class="btn btn-primary" @onclick="GoBack">Go to Character Creator</button>
+                            <!-- Use direct link instead of button with NavigationManager -->
+                            <a href="/userInput" class="btn btn-primary">Go to Character Creator</a>
                         </div>
                     }
                 </div>
@@ -68,9 +71,9 @@
     [SupplyParameterFromQuery(Name = "hairColor")]
     public string HairColor { get; set; } = string.Empty;
 
+    // This method is no longer used but kept for reference
     private void GoBack()
     {
-        // Navigate back to the input form page. Replace "character-input" with your actual route
         NavigationManager.NavigateTo("/userInput");
     }
 

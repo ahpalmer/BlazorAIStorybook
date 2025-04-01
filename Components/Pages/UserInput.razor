@@ -1,6 +1,6 @@
 ﻿@page "/userInput"
-@using System.ComponentModel.DataAnnotations
 @inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -10,19 +10,15 @@
                     <h3 class="mb-0">Character Details</h3>
                 </div>
                 <div class="card-body">
-                    <EditForm Model="@personModel" OnValidSubmit="@HandleValidSubmit" FormName="characterForm">
-                        <DataAnnotationsValidator />
-                        <ValidationSummary />
-
+                    <form action="/formhandler" method="get">
                         <div class="mb-3">
                             <label for="name" class="form-label">Name</label>
-                            <InputText id="name" @bind-Value="personModel.Name" class="form-control" placeholder="Enter your name" />
-                            <ValidationMessage For="@(() => personModel.Name)" />
+                            <input id="nameInput" name="name" class="form-control" placeholder="Enter your name" required />
                         </div>
 
                         <div class="mb-3">
                             <label for="eyeColor" class="form-label">Eye Color</label>
-                            <InputSelect id="eyeColor" @bind-Value="personModel.EyeColor" class="form-select">
+                            <select id="eyeColorInput" name="eyeColor" class="form-select" required>
                                 <option value="">-- Select Eye Color --</option>
                                 <option value="Blue">Blue</option>
                                 <option value="Brown">Brown</option>
@@ -30,13 +26,12 @@
                                 <option value="Hazel">Hazel</option>
                                 <option value="Gray">Gray</option>
                                 <option value="Amber">Amber</option>
-                            </InputSelect>
-                            <ValidationMessage For="@(() => personModel.EyeColor)" />
+                            </select>
                         </div>
 
                         <div class="mb-3">
                             <label for="hairColor" class="form-label">Hair Color</label>
-                            <InputSelect id="hairColor" @bind-Value="personModel.HairColor" class="form-select">
+                            <select id="hairColorInput" name="hairColor" class="form-select" required>
                                 <option value="">-- Select Hair Color --</option>
                                 <option value="Black">Black</option>
                                 <option value="Brown">Brown</option>
@@ -44,40 +39,36 @@
                                 <option value="Red">Red</option>
                                 <option value="Gray">Gray</option>
                                 <option value="White">White</option>
-                            </InputSelect>
-                            <ValidationMessage For="@(() => personModel.HairColor)" />
+                            </select>
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Generate Image</button>
+                            <button type="submit" class="btn btn-primary">Submit Form</button>
                         </div>
-                    </EditForm>
+                    </form>
+                    
+                    <hr />
+                    
+                    <div class="mt-4">
+                        <h5>Alternative Options:</h5>
+                        <p>
+                            <a href="/formhandler?name=John&eyeColor=Blue&hairColor=Brown" class="btn btn-outline-primary">
+                                Go to FormHandler with John
+                            </a>
+                        </p>
+                        <p>
+                            <a href="/image?name=Sarah&eyeColor=Green&hairColor=Red" class="btn btn-outline-primary">
+                                Go to Image with Sarah
+                            </a>
+                        </p>
+                        <p>
+                            <a href="/UserInputTest.html" class="btn btn-outline-secondary">
+                                Try Plain HTML Form
+                            </a>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-@code {
-    private PersonModel personModel = new PersonModel();
-
-    private void HandleValidSubmit()
-    {
-        // Navigate to the image display page with query parameters
-        Console.WriteLine("Form submitted!"); // Check if this appears in your browser console
-        NavigationManager.NavigateTo($"/image?name={Uri.EscapeDataString(personModel.Name)}&eyeColor={Uri.EscapeDataString(personModel.EyeColor)}&hairColor={Uri.EscapeDataString(personModel.HairColor)}");
-    }
-
-    public class PersonModel
-    {
-        [Required(ErrorMessage = "Please enter a name")]
-        [StringLength(50, ErrorMessage = "Name is too long (50 character limit)")]
-        public string Name { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Please select an eye color")]
-        public string EyeColor { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Please select a hair color")]
-        public string HairColor { get; set; } = string.Empty;
-    }
-}
