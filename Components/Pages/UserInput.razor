@@ -10,7 +10,7 @@
                     <h3 class="mb-0">Character Details</h3>
                 </div>
                 <div class="card-body">
-                    <form action="/formhandler" method="get">
+                    <form action="/image" method="get">
                         <div class="mb-3">
                             <label for="name" class="form-label">Name</label>
                             <input id="nameInput" name="name" class="form-control" placeholder="Enter your name" required />
@@ -51,11 +51,6 @@
                     
                     <div class="mt-4">
                         <h5>Alternative Options:</h5>
-                        <p>
-                            <a href="/formhandler?name=John&eyeColor=Blue&hairColor=Brown" class="btn btn-outline-primary">
-                                Go to FormHandler with John
-                            </a>
-                        </p>
                         <p>
                             <a href="/image?name=Sarah&eyeColor=Green&hairColor=Red" class="btn btn-outline-primary">
                                 Go to Image with Sarah
