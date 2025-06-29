@@ -1,4 +1,5 @@
 using BlazorAIStorybook.Components;
+using BlazorAIStorybook.Services;
 
 namespace BlazorAIStorybook;
 
@@ -11,6 +12,8 @@ public class Program
         // Add services to the container.
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
+
+        builder.Services.AddScoped<HeroProfileService>();
 
         var app = builder.Build();
 
