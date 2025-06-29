@@ -1,6 +1,9 @@
 ﻿@page "/userInput"
 @inject NavigationManager NavigationManager
+@inject HeroProfileService HeroProfileService
 @inject IJSRuntime JSRuntime
+@using BlazorAIStorybook.Models
+@using BlazorAIStorybook.Services
 
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -10,15 +13,18 @@
                     <h3 class="mb-0">Character Details</h3>
                 </div>
                 <div class="card-body">
-                    <form action="/image" method="get">
+                    <EditForm Model="@heroProfile" OnValidSubmit="HandleValidSubmit">
+                        <DataAnnotationsValidator />
+
                         <div class="mb-3">
                             <label for="name" class="form-label">Name</label>
-                            <input id="nameInput" name="name" class="form-control" placeholder="Enter your name" required />
+                            <InputText id="nameInput" @bind-Value="heroProfile.HeroName" class="form-control" placeholder="Enter your name" />
+                            <ValidationMessage For="@(() => heroProfile.HeroName)" />
                         </div>
 
                         <div class="mb-3">
                             <label for="eyeColor" class="form-label">Eye Color</label>
-                            <select id="eyeColorInput" name="eyeColor" class="form-select" required>
+                            <InputSelect id="eyeColorInput" @bind-Value="heroProfile.EyeColor" class="form-select">
                                 <option value="">-- Select Eye Color --</option>
                                 <option value="Blue">Blue</option>
                                 <option value="Brown">Brown</option>
@@ -26,12 +32,13 @@
                                 <option value="Hazel">Hazel</option>
                                 <option value="Gray">Gray</option>
                                 <option value="Amber">Amber</option>
-                            </select>
+                            </InputSelect>
+                            <ValidationMessage For="@(() => heroProfile.EyeColor)" />
                         </div>
 
                         <div class="mb-3">
                             <label for="hairColor" class="form-label">Hair Color</label>
-                            <select id="hairColorInput" name="hairColor" class="form-select" required>
+                            <InputSelect id="hairColorInput" @bind-Value="heroProfile.HairColor" class="form-select">
                                 <option value="">-- Select Hair Color --</option>
                                 <option value="Black">Black</option>
                                 <option value="Brown">Brown</option>
@@ -39,17 +46,18 @@
                                 <option value="Red">Red</option>
                                 <option value="Gray">Gray</option>
                                 <option value="White">White</option>
-                            </select>
+                            </InputSelect>
+                            <ValidationMessage For="@(() => heroProfile.HairColor)" />
                         </div>
 
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary">Submit Form</button>
                         </div>
-                    </form>
+                    </EditForm>
                     
                     <hr />
                     
-                    <div class="mt-4">
+                   @*  <div class="mt-4">
                         <h5>Alternative Options:</h5>
                         <p>
                             <a href="/image?name=Sarah&eyeColor=Green&hairColor=Red" class="btn btn-outline-primary">
@@ -61,9 +69,20 @@
                                 Try Plain HTML Form
                             </a>
                         </p>
-                    </div>
+                    </div> *@
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+@code {
+    private HeroProfile heroProfile = new HeroProfile("", "", "");
+
+    private void HandleValidSubmit()
+    {
+        HeroProfileService.CurrentHero = heroProfile;
+
+        NavigationManager.NavigateTo("/image");
+    }
+}
