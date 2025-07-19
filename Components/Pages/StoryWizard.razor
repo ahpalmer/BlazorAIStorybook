@@ -1,0 +1,95 @@
+@page "/story-wizard"
+@using BlazorAIStorybook.Models
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0">Create Your Child's Story</h3>
+                </div>
+                <div class="card-body">
+                    <EditForm Model="@storyRequest" OnValidSubmit="HandleValidSubmit">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="mb-3">
+                            <label class="form-label">What is your child's name?</label>
+                            <InputText class="form-control" @bind-Value="storyRequest.ChildName" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">How old is your child?</label>
+                            <InputNumber class="form-control" @bind-Value="storyRequest.ChildAge" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">What pronouns should we use?</label>
+                            <InputSelect class="form-select" @bind-Value="storyRequest.Pronouns">
+                                <option value="">-- Select Pronouns --</option>
+                                <option value="He/Him">He/Him</option>
+                                <option value="She/Her">She/Her</option>
+                                <option value="They/Them">They/Them</option>
+                                <option value="Custom">Custom</option>
+                            </InputSelect>
+                            @if (storyRequest.Pronouns == "Custom")
+                            {
+                                <InputText class="form-control mt-2" placeholder="Enter custom pronouns" @bind-Value="customPronouns" />
+                            }
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Favorite animal(s)? (comma separated)</label>
+                            <InputText class="form-control" @bind-Value="favoriteAnimalsInput" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Favorite color(s)? (comma separated)</label>
+                            <InputText class="form-control" @bind-Value="favoriteColorsInput" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Favorite activity or hobby?</label>
+                            <InputText class="form-control" @bind-Value="storyRequest.FavoriteActivity" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">A challenge or lesson for the story?</label>
+                            <InputText class="form-control" @bind-Value="storyRequest.StoryLesson" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Any special friends or family to include? (comma separated)</label>
+                            <InputText class="form-control" @bind-Value="specialFriendsInput" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Preferred story setting?</label>
+                            <InputText class="form-control" @bind-Value="storyRequest.PreferredSetting" placeholder="e.g. forest, space, castle" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Anything to avoid in the story?</label>
+                            <InputText class="form-control" @bind-Value="storyRequest.AvoidInStory" />
+                        </div>
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-success">Generate Story</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private StoryRequestModel storyRequest = new();
+    private string favoriteAnimalsInput = string.Empty;
+    private string favoriteColorsInput = string.Empty;
+    private string specialFriendsInput = string.Empty;
+    private string customPronouns = string.Empty;
+
+    private void HandleValidSubmit()
+    {
+        if (storyRequest.Pronouns == "Custom")
+        {
+            storyRequest.Pronouns = customPronouns;
+        }
+        storyRequest.FavoriteAnimals = favoriteAnimalsInput.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+        storyRequest.FavoriteColors = favoriteColorsInput.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+        storyRequest.SpecialFriendsOrFamily = specialFriendsInput.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+        // TODO: Send storyRequest to backend/AI service
+        // For now, just navigate or show a message
+    }
+}
