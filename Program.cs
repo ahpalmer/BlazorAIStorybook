@@ -14,6 +14,7 @@ public class Program
             .AddInteractiveServerComponents();
 
         builder.Services.AddScoped<HeroProfileService>();
+        builder.Services.AddScoped<StoryRequestService>();
 
         var app = builder.Build();
 

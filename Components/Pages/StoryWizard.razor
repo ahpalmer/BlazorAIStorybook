@@ -1,5 +1,6 @@
 @page "/story-wizard"
 @using BlazorAIStorybook.Models
+@inject BlazorAIStorybook.Services.StoryRequestService StoryRequestService
 
 <div class="container mt-5">
     <div class="row justify-content-center">
@@ -89,6 +90,7 @@
         storyRequest.FavoriteAnimals = favoriteAnimalsInput.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
         storyRequest.FavoriteColors = favoriteColorsInput.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
         storyRequest.SpecialFriendsOrFamily = specialFriendsInput.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+        StoryRequestService.CurrentRequest = storyRequest;
         // TODO: Send storyRequest to backend/AI service
         // For now, just navigate or show a message
     }
