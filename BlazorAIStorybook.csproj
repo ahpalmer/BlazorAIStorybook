@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Data\" />
+    <PackageReference Include="MongoDB.Driver" Version="3.4.1" />
   </ItemGroup>
 
 </Project>

@@ -1,7 +1,13 @@
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
 namespace BlazorAIStorybook.Core.Models;
 
 public class StoryRequestModel
 {
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string? Id { get; set; }
     public string? ChildName { get; set; }
     public int? ChildAge { get; set; }
     public string? Pronouns { get; set; }
