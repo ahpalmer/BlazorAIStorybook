@@ -1,5 +1,5 @@
 using BlazorAIStorybook.Components;
-using BlazorAIStorybook.Services;
+using BlazorAIStorybook.Core.Services;
 
 namespace BlazorAIStorybook;
 

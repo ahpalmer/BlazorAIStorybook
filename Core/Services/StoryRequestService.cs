@@ -1,6 +1,6 @@
-using BlazorAIStorybook.Models;
+using BlazorAIStorybook.Core.Models;
 
-namespace BlazorAIStorybook.Services;
+namespace BlazorAIStorybook.Core.Services;
 
 public class StoryRequestService
 {

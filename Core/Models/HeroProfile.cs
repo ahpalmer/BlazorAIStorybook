@@ -1,4 +1,4 @@
-﻿namespace BlazorAIStorybook.Models;
+﻿namespace BlazorAIStorybook.Core.Models;
 
 public class HeroProfile
 {
