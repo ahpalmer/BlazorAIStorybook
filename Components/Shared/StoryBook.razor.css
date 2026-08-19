@@ -1,0 +1,263 @@
+.book-stage {
+    width: min(1120px, 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.1rem;
+}
+
+.book {
+    position: relative;
+    width: 100%;
+    min-height: min(66vh, 580px);
+    max-height: calc(100dvh - 7rem);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* minmax(0,1fr) keeps the row from growing past the book, so pages scroll instead of spilling */
+    grid-template-rows: minmax(0, 1fr);
+    overflow: hidden;
+    perspective: 2400px;
+    border-radius: var(--radius-md);
+    background: var(--paper);
+    box-shadow:
+        4px 5px 0 var(--paper-edge),
+        8px 10px 0 rgba(231, 215, 189, 0.7),
+        12px 15px 0 rgba(231, 215, 189, 0.45),
+        var(--shadow-page);
+}
+
+.page {
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+    background-color: var(--paper);
+    background-image:
+        radial-gradient(circle at 20% 15%, rgba(214, 184, 138, 0.18) 0%, transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(214, 184, 138, 0.14) 0%, transparent 40%),
+        repeating-linear-gradient(0deg, rgba(150, 116, 70, 0.045) 0 1px, transparent 1px 28px);
+}
+
+.page-left {
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+    background-color: var(--paper-shade);
+    /* Gutter shadow: paper curving down into the spine */
+    box-shadow: inset -2.5rem 0 2.5rem -2.5rem rgba(93, 64, 26, 0.4);
+}
+
+.page-right {
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    box-shadow: inset 2.5rem 0 2.5rem -2.5rem rgba(93, 64, 26, 0.4);
+}
+
+.page-inner {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(1.25rem, 2.5vw, 2.25rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    animation: page-settle 320ms var(--ease-soft) both;
+}
+
+.page-left .page-inner {
+    justify-content: center;
+    overflow: hidden;
+}
+
+.page-inner::-webkit-scrollbar {
+    width: 0.5rem;
+}
+
+.page-inner::-webkit-scrollbar-thumb {
+    background: var(--paper-crease);
+    border-radius: var(--radius-pill);
+}
+
+.page-inner::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+@keyframes page-settle {
+    from { opacity: 0; transform: translateY(0.4rem); }
+    to   { opacity: 1; transform: none; }
+}
+
+.spine {
+    position: absolute;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    left: 50%;
+    width: 1.5rem;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 3;
+    background: linear-gradient(90deg,
+        rgba(93, 64, 26, 0) 0%,
+        rgba(93, 64, 26, 0.22) 35%,
+        rgba(93, 64, 26, 0.42) 50%,
+        rgba(93, 64, 26, 0.22) 65%,
+        rgba(93, 64, 26, 0) 100%);
+}
+
+/* --------------------------------------------------------------------------
+   Turning leaf
+   -------------------------------------------------------------------------- */
+
+.leaf {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    width: 50%;
+    z-index: 4;
+    transform-style: preserve-3d;
+    will-change: transform;
+}
+
+.leaf-forward {
+    left: 50%;
+    transform-origin: left center;
+    animation: leaf-turn-forward var(--flip-ms) var(--ease-page) forwards;
+}
+
+.leaf-backward {
+    left: 0;
+    transform-origin: right center;
+    animation: leaf-turn-backward var(--flip-ms) var(--ease-page) forwards;
+}
+
+@keyframes leaf-turn-forward {
+    from { transform: rotateY(0deg); }
+    to   { transform: rotateY(-180deg); }
+}
+
+@keyframes leaf-turn-backward {
+    from { transform: rotateY(0deg); }
+    to   { transform: rotateY(180deg); }
+}
+
+.leaf-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    background-color: var(--paper);
+    background-image: repeating-linear-gradient(0deg, rgba(150, 116, 70, 0.045) 0 1px, transparent 1px 28px);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    box-shadow: var(--shadow-lift);
+}
+
+.leaf-front {
+    background-image:
+        linear-gradient(90deg, rgba(93, 64, 26, 0.28) 0%, transparent 22%),
+        repeating-linear-gradient(0deg, rgba(150, 116, 70, 0.045) 0 1px, transparent 1px 28px);
+}
+
+.leaf-rear {
+    transform: rotateY(180deg);
+    border-radius: var(--radius-md) 0 0 var(--radius-md);
+    background-image:
+        linear-gradient(270deg, rgba(93, 64, 26, 0.28) 0%, transparent 22%),
+        repeating-linear-gradient(0deg, rgba(150, 116, 70, 0.045) 0 1px, transparent 1px 28px);
+}
+
+.book-footer {
+    width: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   Cover state - the whole book is one embossed slab
+   -------------------------------------------------------------------------- */
+
+.book.is-closed {
+    grid-template-columns: 1fr;
+}
+
+.book.is-closed .page-left,
+.book.is-closed .spine {
+    display: none;
+}
+
+.book.is-closed .page-right {
+    border-radius: var(--radius-md);
+    box-shadow: none;
+    background-color: transparent;
+    background-image: none;
+}
+
+.book.is-closed .page-inner {
+    padding: 0.7rem;
+    overflow: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   Narrow screens - left page collapses to a banner above the fields
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 767.98px) {
+    .book {
+        grid-template-columns: 1fr;
+        min-height: 0;
+    }
+
+    .page-left {
+        border-radius: var(--radius-md) var(--radius-md) 0 0;
+        box-shadow: inset 0 -2rem 2rem -2rem rgba(93, 64, 26, 0.4);
+        max-height: 30vh;
+    }
+
+    .page-right {
+        border-radius: 0 0 var(--radius-md) var(--radius-md);
+        box-shadow: none;
+    }
+
+    .spine {
+        top: auto;
+        bottom: auto;
+        left: 0.5rem;
+        right: 0.5rem;
+        width: auto;
+        height: 1rem;
+        transform: none;
+        background: linear-gradient(180deg,
+            rgba(93, 64, 26, 0) 0%,
+            rgba(93, 64, 26, 0.3) 50%,
+            rgba(93, 64, 26, 0) 100%);
+    }
+
+    .leaf,
+    .leaf-forward,
+    .leaf-backward {
+        left: 0;
+        width: 100%;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   Reduced motion - no 3D turn, just a quick cross-fade
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    .page-inner {
+        animation-duration: 120ms;
+        animation-name: page-fade;
+    }
+
+    @keyframes page-fade {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+
+    .leaf-forward,
+    .leaf-backward {
+        transform-origin: center center;
+        animation: leaf-fade var(--flip-ms) linear forwards;
+    }
+
+    @keyframes leaf-fade {
+        0%   { opacity: 1; }
+        100% { opacity: 0; }
+    }
+
+    .leaf-rear {
+        display: none;
+    }
+}

@@ -1,0 +1,29 @@
+@* Ribbon bookmarks. Only already-visited chapters are clickable. *@
+
+<nav class="chapters" aria-label="Story chapters">
+    @for (var i = 0; i < Labels.Length; i++)
+    {
+        var index = i;
+        var state = index == Current ? "is-current" : index <= Furthest ? "is-done" : "is-locked";
+
+        <button type="button"
+                class="chapter @state"
+                disabled="@(index > Furthest || index == Current)"
+                aria-current="@(index == Current ? "step" : null)"
+                @onclick="() => OnSelect.InvokeAsync(index)">
+            <span class="ribbon" aria-hidden="true"></span>
+            <span class="chapter-label">@Labels[index]</span>
+        </button>
+    }
+</nav>
+
+@code {
+    [Parameter, EditorRequired] public string[] Labels { get; set; } = [];
+
+    [Parameter] public int Current { get; set; }
+
+    /// Highest chapter reached so far; anything beyond it stays locked.
+    [Parameter] public int Furthest { get; set; }
+
+    [Parameter] public EventCallback<int> OnSelect { get; set; }
+}

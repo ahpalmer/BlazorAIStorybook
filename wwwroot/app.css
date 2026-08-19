@@ -1,39 +1,243 @@
+/* ==========================================================================
+   Design tokens
+   ========================================================================== */
+
+:root {
+    /* Backdrop */
+    --stage-mint: #88efa8;
+    --stage-teal: #3fc9a4;
+    --stage-deep: #1c8f7e;
+
+    /* Paper */
+    --paper: #fffaf0;
+    --paper-shade: #fdf3e3;
+    --paper-edge: #e7d7bd;
+    --paper-crease: #d9c4a3;
+
+    /* Ink */
+    --ink: #3b2a1e;
+    --ink-soft: #7a6653;
+    --ink-faint: #b6a48d;
+
+    /* Accents */
+    --indigo: #2a0e4f;
+    --indigo-soft: #4a2a7a;
+    --coral: #ff5a4d;
+    --coral-dark: #d93b2f;
+    --magenta: #b0106c;
+    --orange: #e8743b;
+    --sky: #7fb3c8;
+    --leaf-green: #2f9e5f;
+
+    --gradient-warm: linear-gradient(150deg, var(--orange) 0%, var(--magenta) 100%);
+    --gradient-night: linear-gradient(160deg, #3a1263 0%, var(--indigo) 100%);
+
+    /* Type */
+    --font-display: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
+    --font-body: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+    --font-hand: 'Caveat', 'Segoe Script', cursive;
+
+    /* Shape */
+    --radius-sm: 0.5rem;
+    --radius-md: 1rem;
+    --radius-lg: 1.75rem;
+    --radius-pill: 999px;
+
+    /* Depth */
+    --shadow-page: 0 1.5rem 3rem rgba(28, 15, 5, 0.28);
+    --shadow-lift: 0 0.5rem 1.25rem rgba(28, 15, 5, 0.18);
+
+    /* Motion */
+    --flip-ms: 700ms;
+    --ease-page: cubic-bezier(0.42, 0, 0.28, 1);
+    --ease-soft: cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --flip-ms: 240ms;
+    }
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: var(--font-body);
+    color: var(--ink);
+    height: 100%;
 }
 
-a, .btn-link {
-    color: #006bb7;
+body {
+    margin: 0;
+    background: var(--stage-mint);
 }
 
-.btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-.content {
-    padding-top: 1.1rem;
+h1, h2, h3, h4, h5 {
+    font-family: var(--font-display);
+    color: var(--indigo);
+    letter-spacing: 0.01em;
 }
 
 h1:focus {
     outline: none;
 }
 
+a, .btn-link {
+    color: var(--magenta);
+}
+
+/* ==========================================================================
+   Form controls - ruled-paper styling
+   ========================================================================== */
+
+.form-label {
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--indigo);
+    margin-bottom: 0.15rem;
+}
+
+.form-control,
+.form-select {
+    background-color: transparent;
+    border: none;
+    border-bottom: 2px solid var(--paper-crease);
+    border-radius: 0;
+    padding: 0.35rem 0.1rem;
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    color: var(--ink);
+    box-shadow: none;
+    transition: border-color 160ms var(--ease-soft), background-color 160ms var(--ease-soft);
+}
+
+.form-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%237a6653' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-position: right 0.25rem center;
+}
+
+.form-control::placeholder {
+    color: var(--ink-faint);
+    font-style: italic;
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: rgba(255, 226, 168, 0.3);
+    border-bottom-color: var(--coral);
+    box-shadow: none;
+    color: var(--ink);
+}
+
+.form-control:disabled {
+    background-color: transparent;
+    color: var(--ink-faint);
+}
+
+/* ==========================================================================
+   Buttons
+   ========================================================================== */
+
+.btn {
+    font-family: var(--font-display);
+    font-weight: 600;
+    border-radius: var(--radius-pill);
+    transition: transform 140ms var(--ease-soft), box-shadow 140ms var(--ease-soft), background-color 140ms var(--ease-soft);
+}
+
+.btn-primary,
+.btn-success {
+    color: #fff;
+    background-color: var(--coral);
+    border-color: var(--coral);
+    padding: 0.7rem 1.5rem;
+    font-size: 1.1rem;
+    letter-spacing: 0.02em;
+    box-shadow: var(--shadow-lift);
+}
+
+.btn-primary:hover,
+.btn-success:hover,
+.btn-primary:active,
+.btn-success:active {
+    color: #fff;
+    background-color: var(--coral-dark);
+    border-color: var(--coral-dark);
+    transform: translateY(-1px);
+}
+
+.btn-primary:disabled,
+.btn-success:disabled {
+    background-color: var(--ink-faint);
+    border-color: var(--ink-faint);
+    box-shadow: none;
+}
+
+.btn-ghost {
+    background: transparent;
+    border: 2px solid var(--paper-crease);
+    color: var(--ink-soft);
+    padding: 0.6rem 1.35rem;
+}
+
+.btn-ghost:hover {
+    border-color: var(--indigo);
+    color: var(--indigo);
+    background: rgba(42, 14, 79, 0.06);
+}
+
+/* Focus ring tuned for cream paper instead of the default blue-on-white */
+.btn:focus-visible,
+.form-control:focus-visible,
+.form-select:focus-visible,
+.form-check-input:focus-visible,
+a:focus-visible,
+[tabindex]:focus-visible {
+    outline: 3px solid var(--indigo);
+    outline-offset: 2px;
+    box-shadow: none;
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+    box-shadow: none;
+}
+
+.content {
+    padding-top: 1.1rem;
+}
+
+/* ==========================================================================
+   Validation
+   ========================================================================== */
+
 .valid.modified:not([type=checkbox]) {
-    outline: 1px solid #26b050;
+    outline: none;
+    border-bottom-color: var(--leaf-green);
 }
 
 .invalid {
-    outline: 1px solid #e50000;
+    outline: none;
+    border-bottom-color: var(--coral);
 }
 
 .validation-message {
-    color: #e50000;
+    display: block;
+    margin-top: 0.2rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--coral-dark);
+}
+
+.validation-errors {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 0.75rem;
+    color: var(--coral-dark);
+    font-size: 0.9rem;
+    font-weight: 700;
 }
 
 .blazor-error-boundary {
@@ -48,4 +252,20 @@ h1:focus {
 
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
+}
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+
+.sr-live {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }

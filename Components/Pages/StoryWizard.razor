@@ -1,98 +1,356 @@
+@page "/"
 @page "/story-wizard"
-@using BlazorAIStorybook.Core.Services
-@using BlazorAIStorybook.Core.Models
-@inject BlazorAIStorybook.Core.Services.StoryRequestService StoryRequestService
+@inject StoryRequestService StoryRequestService
+@inject HeroProfileService HeroProfileService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">Create Your Child's Story</h3>
-                </div>
-                <div class="card-body">
-                    <EditForm Model="@storyRequest" OnValidSubmit="HandleValidSubmit">
-                        <DataAnnotationsValidator />
-                        <ValidationSummary />
+<PageTitle>Once Upon a Time</PageTitle>
 
-                        <div class="mb-3">
-                            <label class="form-label">What is your child's name?</label>
-                            <InputText class="form-control" @bind-Value="storyRequest.ChildName" />
+<div class="sr-live" aria-live="polite">@_announcement</div>
+
+<EditForm EditContext="_editContext" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <StoryBook @ref="_book" Closed="@(_step == 0)">
+        <Left>
+            @if (_step > 0)
+            {
+                <ArtSlot Alt="@ArtAlt" Caption="@ArtCaption">
+                    <Fallback>
+                        <Illustration Name="@ArtName" />
+                    </Fallback>
+                </ArtSlot>
+            }
+        </Left>
+
+        <Right>
+            @switch (_step)
+            {
+                case 0:
+                    <div class="cover">
+                        <div class="cover-crest"><Illustration Name="crest" /></div>
+                        <h1 tabindex="-1" class="cover-title spread-heading">Once Upon a&nbsp;Time&hellip;</h1>
+                        <p class="cover-sub">A storybook written for one very specific hero.</p>
+                        <div class="cover-flourish"><Illustration Name="flourish" /></div>
+                        <p class="cover-blurb">
+                            Answer a few questions and we will bind them into a tale of their own.
+                        </p>
+                        <button type="button" class="btn btn-primary cover-cta" @onclick="NextAsync">Open the Book</button>
+                    </div>
+                    break;
+
+                case 1:
+                    <h2 tabindex="-1" class="chapter-title spread-heading">Chapter One &middot; Our Hero</h2>
+                    <p class="chapter-lede">Who is this story about?</p>
+
+                    <div class="mb-3">
+                        <label for="childName" class="form-label">What is your child's name?</label>
+                        <InputText id="childName" class="form-control" @bind-Value="_storyRequest.ChildName" placeholder="Ada" />
+                        <ValidationMessage For="@(() => _storyRequest.ChildName)" />
+                    </div>
+
+                    <div class="field-pair">
+                        <div>
+                            <label for="childAge" class="form-label">How old are they?</label>
+                            <InputNumber id="childAge" class="form-control" @bind-Value="_storyRequest.ChildAge" placeholder="6" />
+                            <ValidationMessage For="@(() => _storyRequest.ChildAge)" />
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">How old is your child?</label>
-                            <InputNumber class="form-control" @bind-Value="storyRequest.ChildAge" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">What pronouns should we use?</label>
-                            <InputSelect class="form-select" @bind-Value="storyRequest.Pronouns">
-                                <option value="">-- Select Pronouns --</option>
+                        <div>
+                            <label for="pronouns" class="form-label">Which pronouns?</label>
+                            <InputSelect id="pronouns" class="form-select" @bind-Value="_storyRequest.Pronouns">
+                                <option value="">-- Choose --</option>
                                 <option value="He/Him">He/Him</option>
                                 <option value="She/Her">She/Her</option>
                                 <option value="They/Them">They/Them</option>
-                                <option value="Custom">Custom</option>
+                                <option value="Custom">Something else</option>
                             </InputSelect>
-                            @if (storyRequest.Pronouns == "Custom")
+                            <ValidationMessage For="@(() => _storyRequest.Pronouns)" />
+                        </div>
+                    </div>
+
+                    @if (_storyRequest.Pronouns == "Custom")
+                    {
+                        <div class="mb-3">
+                            <label for="customPronouns" class="form-label">Tell us the pronouns</label>
+                            <input id="customPronouns" class="form-control" @bind="_customPronouns" placeholder="Ze/Zir" />
+                        </div>
+                    }
+
+                    <SwatchPicker Label="Eye color" Options="EyeColors" @bind-Value="_hero.EyeColor" />
+
+                    <SwatchPicker Label="Hair color" Options="HairColors" @bind-Value="_hero.HairColor" />
+                    break;
+
+                case 2:
+                    <h2 tabindex="-1" class="chapter-title spread-heading">Chapter Two &middot; Favorite Things</h2>
+                    <p class="chapter-lede">These get woven into the plot.</p>
+
+                    <TagInput Label="Favorite animals" Placeholder="Otter" Items="_storyRequest.FavoriteAnimals" />
+                    <TagInput Label="Favorite colors" Placeholder="Turquoise" Items="_storyRequest.FavoriteColors" />
+
+                    <div class="mb-3">
+                        <label for="activity" class="form-label">Favorite thing to do?</label>
+                        <InputText id="activity" class="form-control" @bind-Value="_storyRequest.FavoriteActivity"
+                                   placeholder="Building enormous towers" />
+                    </div>
+
+                    <TagInput Label="Friends or family to include" Placeholder="Grandpa Joe"
+                              Items="_storyRequest.SpecialFriendsOrFamily" />
+                    break;
+
+                case 3:
+                    <h2 tabindex="-1" class="chapter-title spread-heading">Chapter Three &middot; The Tale</h2>
+                    <p class="chapter-lede">Last few details, then we start writing.</p>
+
+                    <div class="mb-3">
+                        <label for="lesson" class="form-label">A lesson or challenge for the story?</label>
+                        <InputText id="lesson" class="form-control" @bind-Value="_storyRequest.StoryLesson"
+                                   placeholder="Being brave on the first day of school" />
+                        <ValidationMessage For="@(() => _storyRequest.StoryLesson)" />
+                    </div>
+
+                    <fieldset class="settings">
+                        <legend class="form-label">Where does it happen?</legend>
+                        <div class="setting-grid" role="radiogroup" aria-label="Story setting">
+                            @foreach (var (key, label) in Settings)
                             {
-                                <InputText class="form-control mt-2" placeholder="Enter custom pronouns" @bind-Value="customPronouns" />
+                                var art = key;
+                                var name = label;
+                                var selected = _storyRequest.PreferredSetting == name;
+                                <button type="button" class="setting-card @(selected ? "is-selected" : null)"
+                                        role="radio" aria-checked="@selected"
+                                        @onclick="() => ChooseSetting(name)">
+                                    <Illustration Name="@art" />
+                                    <span>@name</span>
+                                </button>
                             }
+                            <button type="button" class="setting-card setting-other @(_otherSetting ? "is-selected" : null)"
+                                    role="radio" aria-checked="@_otherSetting" @onclick="ChooseOtherSetting">
+                                <span class="setting-other-mark" aria-hidden="true">?</span>
+                                <span>Somewhere else</span>
+                            </button>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Favorite animal(s)? (comma separated)</label>
-                            <InputText class="form-control" @bind-Value="favoriteAnimalsInput" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Favorite color(s)? (comma separated)</label>
-                            <InputText class="form-control" @bind-Value="favoriteColorsInput" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Favorite activity or hobby?</label>
-                            <InputText class="form-control" @bind-Value="storyRequest.FavoriteActivity" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">A challenge or lesson for the story?</label>
-                            <InputText class="form-control" @bind-Value="storyRequest.StoryLesson" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Any special friends or family to include? (comma separated)</label>
-                            <InputText class="form-control" @bind-Value="specialFriendsInput" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Preferred story setting?</label>
-                            <InputText class="form-control" @bind-Value="storyRequest.PreferredSetting" placeholder="e.g. forest, space, castle" />
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Anything to avoid in the story?</label>
-                            <InputText class="form-control" @bind-Value="storyRequest.AvoidInStory" />
-                        </div>
-                        <div class="d-grid gap-2 mt-4">
-                            <button type="submit" class="btn btn-success">Generate Story</button>
-                        </div>
-                    </EditForm>
+                        @if (_otherSetting)
+                        {
+                            <input class="form-control mt-2" placeholder="A lighthouse at the edge of the world"
+                                   @bind="_storyRequest.PreferredSetting" @bind:event="oninput" />
+                        }
+                    </fieldset>
+
+                    <div class="mb-3">
+                        <label for="avoid" class="form-label">Anything to leave out?</label>
+                        <InputText id="avoid" class="form-control" @bind-Value="_storyRequest.AvoidInStory"
+                                   placeholder="Nothing scary in the dark" />
+                    </div>
+                    break;
+            }
+
+            @if (_step > 0)
+            {
+                <div class="page-foot">
+                    <div class="page-actions">
+                        <button type="button" class="btn btn-ghost" @onclick="BackAsync" disabled="@IsBusy">Back</button>
+
+                        @if (_step < LastStep)
+                        {
+                            <button type="button" class="btn btn-primary" @onclick="NextAsync" disabled="@IsBusy">Next Page</button>
+                        }
+                        else
+                        {
+                            <button type="submit" class="btn btn-primary" disabled="@IsBusy">Write My Story</button>
+                        }
+                    </div>
+
+                    <p class="folio">@_step of @LastStep</p>
                 </div>
-            </div>
-        </div>
-    </div>
-</div>
+            }
+        </Right>
+
+        <Footer>
+            <ChapterProgress Labels="ChapterLabels" Current="_step" Furthest="_furthest" OnSelect="GoToAsync" />
+        </Footer>
+    </StoryBook>
+</EditForm>
 
 @code {
-    private StoryRequestModel storyRequest = new();
-    private string favoriteAnimalsInput = string.Empty;
-    private string favoriteColorsInput = string.Empty;
-    private string specialFriendsInput = string.Empty;
-    private string customPronouns = string.Empty;
+    private const int LastStep = 3;
+
+    private static readonly string[] ChapterLabels = ["Cover", "Our Hero", "Favorites", "The Tale"];
+
+    // Only these are gated per spread; everything else is optional.
+    private static readonly string[][] StepFields =
+    [
+        [],
+        [nameof(StoryRequestModel.ChildName), nameof(StoryRequestModel.ChildAge), nameof(StoryRequestModel.Pronouns)],
+        [],
+        [nameof(StoryRequestModel.StoryLesson)]
+    ];
+
+    private static readonly Dictionary<string, string> EyeColors = new()
+    {
+        ["Blue"] = "#3498db",
+        ["Brown"] = "#8b4513",
+        ["Green"] = "#2ecc71",
+        ["Hazel"] = "#d2b48c",
+        ["Gray"] = "#95a5a6",
+        ["Amber"] = "#ffbf00"
+    };
+
+    private static readonly Dictionary<string, string> HairColors = new()
+    {
+        ["Black"] = "#2c2c2c",
+        ["Brown"] = "#6f4e37",
+        ["Blonde"] = "#f0d98c",
+        ["Red"] = "#c1440e",
+        ["Gray"] = "#b0b0b0",
+        ["White"] = "#f2f2f2"
+    };
+
+    private static readonly Dictionary<string, string> Settings = new()
+    {
+        ["forest"] = "Deep forest",
+        ["space"] = "Outer space",
+        ["castle"] = "Old castle",
+        ["ocean"] = "Open ocean"
+    };
+
+    private readonly StoryRequestModel _storyRequest = new();
+    private readonly HeroProfile _hero = new(string.Empty, string.Empty, string.Empty);
+    private readonly EditContext _editContext;
+
+    private StoryBook? _book;
+
+    private int _step;
+    private int _furthest;
+    private string _customPronouns = string.Empty;
+    private bool _otherSetting;
+    private string _announcement = string.Empty;
+
+    public StoryWizard()
+    {
+        _editContext = new EditContext(_storyRequest);
+    }
+
+    private bool IsBusy => _book?.IsFlipping ?? false;
+
+    private string ArtName => _step switch
+    {
+        1 => "hero",
+        2 => "menagerie",
+        _ => "quill"
+    };
+
+    private string ArtAlt => _step switch
+    {
+        1 => "A young hero standing beneath a banner",
+        2 => "A cat, a rabbit and a bird gathered together",
+        _ => "A quill resting beside an inkwell"
+    };
+
+    private string ArtCaption => _step switch
+    {
+        1 => "our hero",
+        2 => "the good company",
+        _ => "and so it begins"
+    };
+
+    private async Task NextAsync()
+    {
+        if (IsBusy || _book is null)
+        {
+            return;
+        }
+
+        if (!CurrentStepIsValid())
+        {
+            _announcement = "Some answers are still missing on this page.";
+            return;
+        }
+
+        await _book.FlipForwardAsync(() =>
+        {
+            _step++;
+            _furthest = Math.Max(_furthest, _step);
+        });
+
+        await AfterFlipAsync();
+    }
+
+    private async Task BackAsync()
+    {
+        if (IsBusy || _book is null || _step == 0)
+        {
+            return;
+        }
+
+        await _book.FlipBackAsync(() => _step--);
+        await AfterFlipAsync();
+    }
+
+    private async Task GoToAsync(int target)
+    {
+        if (IsBusy || _book is null || target == _step || target > _furthest)
+        {
+            return;
+        }
+
+        if (target > _step && !CurrentStepIsValid())
+        {
+            return;
+        }
+
+        var forward = target > _step;
+        var flip = forward ? _book.FlipForwardAsync(() => _step = target) : _book.FlipBackAsync(() => _step = target);
+        await flip;
+        await AfterFlipAsync();
+    }
+
+    private async Task AfterFlipAsync()
+    {
+        _announcement = $"{ChapterLabels[_step]}, page {_step} of {LastStep}.";
+        await JS.InvokeVoidAsync("storybook.focus", ".spread-heading");
+    }
+
+    private bool CurrentStepIsValid()
+    {
+        // Validating marks every field, so skip it entirely on spreads that gate nothing -
+        // otherwise the next spread opens with its errors already showing.
+        if (StepFields[_step].Length == 0)
+        {
+            return true;
+        }
+
+        _editContext.Validate();
+
+        return !StepFields[_step].Any(field =>
+            _editContext.GetValidationMessages(new FieldIdentifier(_storyRequest, field)).Any());
+    }
+
+    private void ChooseSetting(string value)
+    {
+        _otherSetting = false;
+        _storyRequest.PreferredSetting = value;
+    }
+
+    private void ChooseOtherSetting()
+    {
+        _otherSetting = true;
+        _storyRequest.PreferredSetting = string.Empty;
+    }
 
     private void HandleValidSubmit()
     {
-        if (storyRequest.Pronouns == "Custom")
+        if (_storyRequest.Pronouns == "Custom" && !string.IsNullOrWhiteSpace(_customPronouns))
         {
-            storyRequest.Pronouns = customPronouns;
+            _storyRequest.Pronouns = _customPronouns;
         }
-        storyRequest.FavoriteAnimals = favoriteAnimalsInput.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
-        storyRequest.FavoriteColors = favoriteColorsInput.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
-        storyRequest.SpecialFriendsOrFamily = specialFriendsInput.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
-        StoryRequestService.CurrentRequest = storyRequest;
-        // TODO: Send storyRequest to backend/AI service
-        // For now, just navigate or show a message
+
+        StoryRequestService.CurrentRequest = _storyRequest;
+
+        _hero.HeroName = _storyRequest.ChildName;
+        HeroProfileService.CurrentHero = _hero;
+
+        NavigationManager.NavigateTo("/image");
     }
 }

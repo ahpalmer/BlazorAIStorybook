@@ -1,0 +1,34 @@
+@* Seam for AI-generated art: set Src (files belong in wwwroot/images) and the SVG fallback drops out. *@
+
+<figure class="art-slot @(HasImage ? "has-image" : "is-placeholder")">
+    <div class="art-media" style="aspect-ratio: @AspectRatio;">
+        @if (HasImage)
+        {
+            <img src="@Src" alt="@Alt" loading="lazy" />
+        }
+        else
+        {
+            <div class="art-fallback" role="img" aria-label="@Alt">
+                @Fallback
+            </div>
+        }
+    </div>
+    @if (Caption is not null)
+    {
+        <figcaption>@Caption</figcaption>
+    }
+</figure>
+
+@code {
+    [Parameter] public string? Src { get; set; }
+
+    [Parameter, EditorRequired] public string Alt { get; set; } = string.Empty;
+
+    [Parameter] public RenderFragment? Fallback { get; set; }
+
+    [Parameter] public string AspectRatio { get; set; } = "4 / 3";
+
+    [Parameter] public string? Caption { get; set; }
+
+    private bool HasImage => !string.IsNullOrWhiteSpace(Src);
+}

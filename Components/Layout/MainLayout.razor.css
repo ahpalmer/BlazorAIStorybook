@@ -1,78 +1,68 @@
-.page {
+.stage {
     position: relative;
-    display: flex;
-    flex-direction: column;
-}
-
-main {
-    flex: 1;
-}
-
-.sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
-}
-
-.top-row {
-    background-color: #f7f7f7;
-    border-bottom: 1px solid #d6d5d5;
-    justify-content: flex-end;
-    height: 3.5rem;
+    min-height: 100dvh;
     display: flex;
     align-items: center;
+    justify-content: center;
+    padding: clamp(0.75rem, 2.5vw, 1.75rem);
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 50% 120%, rgba(255, 255, 255, 0.45) 0%, transparent 55%),
+        linear-gradient(160deg, var(--stage-mint) 0%, var(--stage-teal) 55%, var(--stage-deep) 100%);
 }
 
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        white-space: nowrap;
-        margin-left: 1.5rem;
-        text-decoration: none;
-    }
-
-    .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
-        text-decoration: underline;
-    }
-
-    .top-row ::deep a:first-child {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-@media (max-width: 640.98px) {
-    .top-row {
-        justify-content: space-between;
-    }
-
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        margin-left: 0;
-    }
+/* Vignette so the book reads as lit from above */
+.stage::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse at 50% 45%, transparent 45%, rgba(6, 48, 40, 0.35) 100%);
 }
 
-@media (min-width: 641px) {
-    .page {
-        flex-direction: row;
-    }
+.stage-content {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
 
-    .sidebar {
-        width: 250px;
-        height: 100vh;
-        position: sticky;
-        top: 0;
-    }
+/* Drifting dust motes */
+.motes {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
 
-    .top-row {
-        position: sticky;
-        top: 0;
-        z-index: 1;
-    }
+.motes span {
+    position: absolute;
+    bottom: -10%;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.7);
+    filter: blur(1px);
+    animation: drift linear infinite;
+}
 
-    .top-row.auth ::deep a:first-child {
-        flex: 1;
-        text-align: right;
-        width: 0;
-    }
+.motes span:nth-child(1) { left: 8%;  animation-duration: 26s; animation-delay: 0s;   }
+.motes span:nth-child(2) { left: 24%; animation-duration: 34s; animation-delay: -6s;  transform: scale(0.6); }
+.motes span:nth-child(3) { left: 47%; animation-duration: 29s; animation-delay: -14s; transform: scale(1.3); }
+.motes span:nth-child(4) { left: 66%; animation-duration: 38s; animation-delay: -3s;  transform: scale(0.8); }
+.motes span:nth-child(5) { left: 81%; animation-duration: 31s; animation-delay: -19s; }
+.motes span:nth-child(6) { left: 93%; animation-duration: 24s; animation-delay: -9s;  transform: scale(0.5); }
 
-    .top-row, article {
-        padding-left: 2rem !important;
-        padding-right: 1.5rem !important;
+@keyframes drift {
+    0%   { transform: translate3d(0, 0, 0) scale(1); opacity: 0; }
+    10%  { opacity: 0.9; }
+    90%  { opacity: 0.5; }
+    100% { transform: translate3d(2.5rem, -110vh, 0) scale(1.1); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .motes {
+        display: none;
     }
 }
 

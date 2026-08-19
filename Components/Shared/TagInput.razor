@@ -1,0 +1,70 @@
+@* Type and press Enter to add a chip. Backspace on an empty box removes the last one. *@
+
+<div class="tag-input">
+    <label class="form-label" for="@_inputId">@Label</label>
+
+    <div class="chips">
+        @foreach (var item in Items)
+        {
+            var value = item;
+            <span class="chip" @key="value">
+                @value
+                <button type="button" class="chip-remove" aria-label="@($"Remove {value}")" @onclick="() => RemoveAsync(value)">&times;</button>
+            </span>
+        }
+    </div>
+
+    <input id="@_inputId"
+           class="form-control"
+           placeholder="@Placeholder"
+           value="@_draft"
+           @oninput="e => _draft = e.Value?.ToString() ?? string.Empty"
+           @onkeydown="OnKeyDownAsync" />
+
+    <span class="tag-hint">Press Enter after each one</span>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    [Parameter] public string? Placeholder { get; set; }
+
+    [Parameter, EditorRequired] public List<string> Items { get; set; } = new();
+
+    [Parameter] public EventCallback<List<string>> ItemsChanged { get; set; }
+
+    private readonly string _inputId = $"tag-{Guid.NewGuid():N}";
+    private string _draft = string.Empty;
+
+    private async Task OnKeyDownAsync(KeyboardEventArgs e)
+    {
+        if (e.Key is "Enter" or ",")
+        {
+            await CommitAsync();
+        }
+        else if (e.Key == "Backspace" && _draft.Length == 0 && Items.Count > 0)
+        {
+            await RemoveAsync(Items[^1]);
+        }
+    }
+
+    private async Task CommitAsync()
+    {
+        var value = _draft.Trim();
+        _draft = string.Empty;
+
+        if (value.Length == 0 || Items.Contains(value, StringComparer.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        Items.Add(value);
+        await ItemsChanged.InvokeAsync(Items);
+    }
+
+    private async Task RemoveAsync(string value)
+    {
+        Items.Remove(value);
+        await ItemsChanged.InvokeAsync(Items);
+    }
+}

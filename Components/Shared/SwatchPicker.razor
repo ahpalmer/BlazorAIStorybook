@@ -1,0 +1,40 @@
+@* Radio group rendered as color swatches. *@
+
+<fieldset class="swatches">
+    <legend class="form-label">@Label</legend>
+
+    <div class="swatch-row" role="radiogroup" aria-label="@Label">
+        @foreach (var option in Options)
+        {
+            var name = option.Key;
+            var swatch = option.Value;
+            var selected = string.Equals(Value, name, StringComparison.OrdinalIgnoreCase);
+
+            <button type="button"
+                    class="swatch @(selected ? "is-selected" : null)"
+                    role="radio"
+                    aria-checked="@(selected ? "true" : "false")"
+                    title="@name"
+                    @onclick="@(() => SelectAsync(name))">
+                <span class="dot" style="background:@swatch;" aria-hidden="true"></span>
+                <span class="swatch-name">@name</span>
+            </button>
+        }
+    </div>
+</fieldset>
+
+@code {
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+
+    [Parameter, EditorRequired] public Dictionary<string, string> Options { get; set; } = new();
+
+    [Parameter] public string? Value { get; set; }
+
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+
+    private async Task SelectAsync(string name)
+    {
+        Value = name;
+        await ValueChanged.InvokeAsync(name);
+    }
+}

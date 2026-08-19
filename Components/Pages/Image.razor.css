@@ -1,0 +1,70 @@
+.story-title {
+    margin: 0;
+    font-size: clamp(1.6rem, 3.4vw, 2.3rem);
+}
+
+.story-title:focus-visible {
+    outline: 3px solid var(--indigo);
+    outline-offset: 4px;
+}
+
+.title-rule {
+    width: 100%;
+    max-width: 18rem;
+    color: var(--ink-faint);
+    margin-bottom: 1rem;
+}
+
+.story-body {
+    font-size: 1.08rem;
+    line-height: 1.7;
+}
+
+/* Drop cap on the opening paragraph */
+.story-body::first-letter {
+    float: left;
+    font-family: var(--font-display);
+    font-size: 3.4rem;
+    line-height: 0.82;
+    padding: 0.15rem 0.5rem 0 0;
+    color: var(--magenta);
+}
+
+.ledger {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.35rem 1rem;
+    margin: 1.4rem 0 0;
+    padding-top: 1rem;
+    border-top: 1px dashed var(--paper-crease);
+    font-size: 0.95rem;
+}
+
+.ledger dt {
+    font-family: var(--font-display);
+    color: var(--indigo);
+}
+
+.ledger dd {
+    margin: 0;
+    color: var(--ink-soft);
+}
+
+.signature {
+    margin: 1.4rem 0 0;
+    font-family: var(--font-hand);
+    font-size: 1.5rem;
+    color: var(--ink-faint);
+    text-align: right;
+}
+
+.page-actions {
+    display: flex;
+    margin-top: auto;
+    padding-top: 1.5rem;
+}
+
+.page-actions .btn {
+    flex: 1;
+    text-align: center;
+}

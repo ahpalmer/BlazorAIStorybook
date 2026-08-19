@@ -1,0 +1,55 @@
+.swatches {
+    border: none;
+    padding: 0;
+    margin: 0 0 0.75rem;
+}
+
+.swatch-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.swatch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.6rem 0.2rem 0.25rem;
+    border: 2px solid var(--paper-crease);
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: var(--ink-soft);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 140ms var(--ease-soft), color 140ms var(--ease-soft), transform 140ms var(--ease-soft);
+}
+
+.swatch:hover {
+    border-color: var(--ink-soft);
+    transform: translateY(-1px);
+}
+
+.swatch.is-selected {
+    border-color: var(--coral);
+    color: var(--indigo);
+    box-shadow: var(--shadow-lift);
+}
+
+.dot {
+    width: 1.15rem;
+    height: 1.15rem;
+    border-radius: 50%;
+    border: 1px solid rgba(59, 42, 30, 0.25);
+    box-shadow: inset -2px -3px 4px rgba(0, 0, 0, 0.18);
+}
+
+.swatch.is-selected .dot {
+    transform: scale(1.08);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .swatch {
+        transition: none;
+    }
+}

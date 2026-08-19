@@ -1,67 +1,93 @@
 ﻿@page "/image"
-@inject NavigationManager NavigationManager
 @inject HeroProfileService HeroProfileService
-@inject IJSRuntime JSRuntime
-@using BlazorAIStorybook.Core.Models
-@using BlazorAIStorybook.Core.Services
+@inject StoryRequestService StoryRequestService
 @implements IDisposable
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">Character Image</h3>
-                </div>
-                <div class="card-body">
-                    @if (hero != null && !string.IsNullOrEmpty(hero.HeroName))
-                    {
-                        <div class="text-center mb-4">
-                            <h2>@hero.HeroName</h2>
-                            <div class="badge bg-info me-2">Eyes: @hero.EyeColor</div>
-                            <div class="badge bg-info">Hair: @hero.HairColor</div>
-                        </div>
+<PageTitle>Your Story</PageTitle>
 
-                        <div class="text-center">
-                            <div class="character-image-placeholder p-5 bg-light border rounded mb-3">
-                                <p class="mb-2">Character with:</p>
-                                <ul class="list-unstyled">
-                                    <li><strong>Name:</strong> @hero.HeroName</li>
-                                    <li><strong>Eye Color:</strong> @hero.EyeColor</li>
-                                    <li><strong>Hair Color:</strong> @hero.HairColor</li>
-                                </ul>
-                                <div style="width:200px; height:200px; background-color:#f0f0f0; margin:0 auto; border-radius:50%; position:relative;" class="mt-3">
-                                    <div style="width:50px; height:50px; border-radius:50%; background-color:@GetEyeColorCode(hero.EyeColor); position:absolute; top:60px; left:40px;"></div>
-                                    <div style="width:50px; height:50px; border-radius:50%; background-color:@GetEyeColorCode(hero.EyeColor); position:absolute; top:60px; right:40px;"></div>
-                                    <div style="width:80px; height:20px; border-radius:10px; background-color:#888; position:absolute; top:130px; left:60px;"></div>
-                                    <div style="width:200px; height:80px; border-radius:100px 100px 0 0; background-color:@GetHairColorCode(hero.HairColor); position:absolute; top:-10px;"></div>
-                                </div>
-                            </div>
-                        </div>
+<StoryBook>
+    <Left>
+        <ArtSlot Alt="@($"Portrait of {DisplayName}")" Caption="@DisplayName" AspectRatio="1 / 1">
+            <Fallback>
+                <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="presentation" focusable="false">
+                    <circle cx="100" cy="105" r="72" fill="#f4ece0" />
+                    <path d="M28 96 a72 72 0 0 1 144 0 q-72 -34 -144 0 Z" fill="@HairColorCode" />
+                    <circle cx="74" cy="108" r="11" fill="@EyeColorCode" />
+                    <circle cx="126" cy="108" r="11" fill="@EyeColorCode" />
+                    <circle cx="77" cy="104" r="3.5" fill="#fff" opacity="0.9" />
+                    <circle cx="129" cy="104" r="3.5" fill="#fff" opacity="0.9" />
+                    <path d="M78 142 q22 18 44 0" fill="none" stroke="var(--ink-soft)" stroke-width="5" stroke-linecap="round" />
+                    <circle cx="56" cy="132" r="8" fill="var(--coral)" opacity="0.35" />
+                    <circle cx="144" cy="132" r="8" fill="var(--coral)" opacity="0.35" />
+                </svg>
+            </Fallback>
+        </ArtSlot>
+    </Left>
 
-                        <div class="d-grid gap-2">
-                            <a href="/userInput" class="btn btn-primary">Create Another Character</a>
-                        </div>
-                    }
-                    else
+    <Right>
+        @if (_hero is not null && !string.IsNullOrWhiteSpace(_hero.HeroName))
+        {
+            <h1 tabindex="-1" class="story-title">The Tale of @_hero.HeroName</h1>
+            <div class="title-rule" aria-hidden="true"><Illustration Name="flourish" /></div>
+
+            <p class="story-body">
+                Once upon a time there was a hero named <strong>@_hero.HeroName</strong>@AgeClause,
+                with @Describe(_hero.EyeColor, "eyes") and @Describe(_hero.HairColor, "hair").
+                @Companions
+            </p>
+
+            @if (_request is not null)
+            {
+                <dl class="ledger">
+                    @if (_request.FavoriteAnimals.Count > 0)
                     {
-                        <div class="alert alert-warning">
-                            <p>No character details found. Please go back and create a character.</p>
-                            <a href="/userInput" class="btn btn-primary">Go to Character Creator</a>
-                        </div>
+                        <dt>Creatures</dt>
+                        <dd>@string.Join(", ", _request.FavoriteAnimals)</dd>
                     }
-                </div>
+                    @if (!string.IsNullOrWhiteSpace(_request.FavoriteActivity))
+                    {
+                        <dt>Loves to</dt>
+                        <dd>@_request.FavoriteActivity</dd>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(_request.PreferredSetting))
+                    {
+                        <dt>Setting</dt>
+                        <dd>@_request.PreferredSetting</dd>
+                    }
+                    @if (!string.IsNullOrWhiteSpace(_request.StoryLesson))
+                    {
+                        <dt>Lesson</dt>
+                        <dd>@_request.StoryLesson</dd>
+                    }
+                </dl>
+            }
+
+            <p class="signature">&mdash; to be continued</p>
+
+            <div class="page-actions">
+                <a href="/story-wizard" class="btn btn-primary">Start a New Story</a>
             </div>
-        </div>
-    </div>
-</div>
+        }
+        else
+        {
+            <h1 tabindex="-1" class="story-title">This page is blank</h1>
+            <div class="title-rule" aria-hidden="true"><Illustration Name="flourish" /></div>
+            <p class="story-body">No hero has been written yet. Head back to the cover and we will start at the beginning.</p>
+            <div class="page-actions">
+                <a href="/story-wizard" class="btn btn-primary">Open the Book</a>
+            </div>
+        }
+    </Right>
+</StoryBook>
 
 @code {
-    private HeroProfile? hero;
+    private HeroProfile? _hero;
+    private StoryRequestModel? _request;
 
     protected override void OnInitialized()
     {
-        hero = HeroProfileService.CurrentHero;
+        _hero = HeroProfileService.CurrentHero;
+        _request = StoryRequestService.CurrentRequest;
         HeroProfileService.OnChange += StateHasChanged;
     }
 
@@ -70,31 +96,43 @@
         HeroProfileService.OnChange -= StateHasChanged;
     }
 
-    private string GetEyeColorCode(string? eyeColor)
+    private string DisplayName => _hero?.HeroName is { Length: > 0 } name ? name : "our hero";
+
+    private string AgeClause => _request?.ChildAge is int age ? $", aged {age}" : string.Empty;
+
+    private string Companions
     {
-        return eyeColor?.ToLower() switch
+        get
         {
-            "blue" => "#3498db",
-            "brown" => "#8B4513",
-            "green" => "#2ecc71",
-            "hazel" => "#D2B48C",
-            "gray" => "#7f8c8d",
-            "amber" => "#FF7F50",
-            _ => "#000000"
-        };
+            var friends = _request?.SpecialFriendsOrFamily;
+            return friends is { Count: > 0 }
+                ? $"Traveling alongside them: {string.Join(", ", friends)}."
+                : string.Empty;
+        }
     }
 
-    private string GetHairColorCode(string? hairColor)
+    private static string Describe(string? color, string noun) =>
+        string.IsNullOrWhiteSpace(color) ? $"bright {noun}" : $"{color.ToLowerInvariant()} {noun}";
+
+    private string EyeColorCode => _hero?.EyeColor?.ToLowerInvariant() switch
     {
-        return hairColor?.ToLower() switch
-        {
-            "black" => "#2c3e50",
-            "brown" => "#8B4513",
-            "blonde" => "#f1c40f",
-            "red" => "#e74c3c",
-            "gray" => "#95a5a6",
-            "white" => "#ecf0f1",
-            _ => "#000000"
-        };
-    }
+        "blue" => "#3498db",
+        "brown" => "#8b4513",
+        "green" => "#2ecc71",
+        "hazel" => "#d2b48c",
+        "gray" => "#7f8c8d",
+        "amber" => "#ff7f50",
+        _ => "#5d4037"
+    };
+
+    private string HairColorCode => _hero?.HairColor?.ToLowerInvariant() switch
+    {
+        "black" => "#2c3e50",
+        "brown" => "#8b4513",
+        "blonde" => "#f1c40f",
+        "red" => "#e74c3c",
+        "gray" => "#95a5a6",
+        "white" => "#ecf0f1",
+        _ => "#6f4e37"
+    };
 }

@@ -1,0 +1,78 @@
+@* Book chrome + page-turn. Parent drives it via @ref: await Book.FlipForwardAsync(() => step++). *@
+
+<div class="book-stage">
+    <div class="book @(_flipping ? "is-flipping" : null) @(Closed ? "is-closed" : null)">
+
+        <div class="page page-left">
+            <div class="page-inner" @key="@($"L{_contentVersion}")">
+                @Left
+            </div>
+        </div>
+
+        <div class="spine" aria-hidden="true"></div>
+
+        <div class="page page-right">
+            <div class="page-inner" @key="@($"R{_contentVersion}")">
+                @Right
+            </div>
+        </div>
+
+        @if (_flipping)
+        {
+            <div class="leaf @(_forward ? "leaf-forward" : "leaf-backward")" aria-hidden="true">
+                <div class="leaf-face leaf-front"></div>
+                <div class="leaf-face leaf-rear"></div>
+            </div>
+        }
+    </div>
+
+    @if (Footer is not null)
+    {
+        <div class="book-footer">@Footer</div>
+    }
+</div>
+
+@code {
+    [Parameter] public RenderFragment? Left { get; set; }
+    [Parameter] public RenderFragment? Right { get; set; }
+    [Parameter] public RenderFragment? Footer { get; set; }
+
+    [Parameter] public bool Closed { get; set; }
+
+    private const int FlipMilliseconds = 700;
+
+    private bool _flipping;
+    private bool _forward = true;
+
+    // Keying on this rather than a parameter keeps the rebuild inside the flip,
+    // so a later parameter update cannot rebuild the page and drop focus.
+    private int _contentVersion;
+
+    public bool IsFlipping => _flipping;
+
+    public Task FlipForwardAsync(Action apply) => FlipAsync(apply, forward: true);
+
+    public Task FlipBackAsync(Action apply) => FlipAsync(apply, forward: false);
+
+    private async Task FlipAsync(Action apply, bool forward)
+    {
+        if (_flipping)
+        {
+            return;
+        }
+
+        _flipping = true;
+        _forward = forward;
+        StateHasChanged();
+
+        // Swap content at the midpoint, while the leaf is edge-on and hides it.
+        await Task.Delay(FlipMilliseconds / 2);
+        _contentVersion++;
+        apply();
+        StateHasChanged();
+
+        await Task.Delay(FlipMilliseconds / 2);
+        _flipping = false;
+        StateHasChanged();
+    }
+}
